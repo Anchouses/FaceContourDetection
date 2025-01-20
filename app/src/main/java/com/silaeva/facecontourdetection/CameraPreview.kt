@@ -1,13 +1,8 @@
 package com.silaeva.facecontourdetection
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.os.Environment
-import android.util.Log
 import android.view.ViewGroup
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
@@ -40,15 +35,12 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import com.google.mlkit.vision.face.Face
-import java.io.File
 
 
 @Composable
 fun CameraPreview(
     viewModel: FaceDetectionViewModel,
-    onCapture: (Bitmap, File) -> Unit,
     cameraSelector: CameraSelector,
     onSwitchCamera:(CameraSelector) -> Unit
 ) {
@@ -116,44 +108,13 @@ fun CameraPreview(
                 .padding(bottom = 60.dp)
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter),
-            horizontalArrangement = Arrangement.SpaceAround
+            horizontalArrangement = Arrangement.Center
         ) {
             SwitchButton(
                 onSwitchCamera = {
                     onSwitchCamera(cameraSelector)
                 }
             )
-
-            Button(
-                onClick = {
-                    val photoFile = File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "${System.currentTimeMillis()}.jpg")
-                    Log.d("PhotoPath", photoFile.absolutePath)
-                    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-                    imageCapture.takePicture(
-                        outputOptions,
-                        ContextCompat.getMainExecutor(context),
-                        object : ImageCapture.OnImageSavedCallback {
-                            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                                val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-                                onCapture(bitmap, photoFile)
-                            }
-                            override fun onError(exception: ImageCaptureException) {
-                                Log.e("EXCEPTION", "ImageCaptureException", exception)
-                            }
-                        }
-                    )
-                },
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.DarkGray
-                )
-            ) {
-                Text(
-                    text = "Capture",
-                    color = Color.White
-                )
-            }
         }
     }
 }

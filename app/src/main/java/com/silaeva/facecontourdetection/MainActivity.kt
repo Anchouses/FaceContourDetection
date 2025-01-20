@@ -1,7 +1,6 @@
 package com.silaeva.facecontourdetection
 
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -18,13 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.silaeva.facecontourdetection.ui.theme.FaceContourDetectionTheme
-import java.io.File
-import java.io.FileOutputStream
 
 class MainActivity : ComponentActivity() {
 
     private val isStartCamera = mutableStateOf(false)
-    private var bitmap = mutableStateOf<Bitmap?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,16 +31,12 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()
                 ) {
                     val viewModel: FaceDetectionViewModel = viewModel()
-                    val cameraSelector = remember { mutableStateOf(CameraSelector.DEFAULT_BACK_CAMERA) }
+                    val cameraSelector = remember { mutableStateOf(CameraSelector.DEFAULT_FRONT_CAMERA) }
 
                     if (allPermissionsGranted() || isStartCamera.value) {
                         CameraPreview(
                             viewModel = viewModel,
                             cameraSelector = cameraSelector.value,
-                            onCapture = { bit, file ->
-                                bitmap.value = bit
-                                onCapturePhoto(bitmap.value, file = file)
-                            },
                             onSwitchCamera = {
                                 cameraSelector.value = onSwitchLens(cameraSelector.value)
                             }
@@ -63,15 +55,6 @@ class MainActivity : ComponentActivity() {
         } else {
             CameraSelector.DEFAULT_FRONT_CAMERA
         }
-
-
-    private fun onCapturePhoto(bitmap: Bitmap?, file: File) {
-        bitmap?.let { bmp ->
-            FileOutputStream(file).use { out ->
-                bmp.compress(Bitmap.CompressFormat.JPEG, 100, out)
-            }
-        }
-    }
 
     private val REQUIRED_PERMISSIONS =
         mutableListOf (
